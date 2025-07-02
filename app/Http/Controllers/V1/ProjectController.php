@@ -12,13 +12,30 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
 
+/**
+ * @OA\Tag(
+ *     name="projects",
+ *     description="Project management endpoints"
+ * )
+ */
 class ProjectController extends Controller
 {
     /**
-     * Display a listing of the projects.
+     * @OA\Get(
+     *     path="/api/projects",
+     *     tags={"projects"},
+     *     summary="List projects",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="List of projects",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(ref="#/components/schemas/Project")
+     *         )
+     *     )
+     * )
      */
-
-    //===note1:use filter
     public function index(): JsonResource
     {
         Gate::authorize('viewAny', Project::class);
@@ -31,7 +48,28 @@ class ProjectController extends Controller
     }
 
     /**
-     * Store a newly created project in storage.
+     * @OA\Post(
+     *     path="/api/projects",
+     *     tags={"projects"},
+     *     summary="Create a project",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name"},
+     *             @OA\Property(property="name", type="string", example="Project Alpha")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Project created",
+     *         @OA\JsonContent(ref="#/components/schemas/Project")
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error"
+     *     )
+     * )
      */
     public function store(StoreProjectRequest $request): JsonResponse
     {
@@ -52,7 +90,27 @@ class ProjectController extends Controller
     }
 
     /**
-     * Display the specified project.
+     * @OA\Get(
+     *     path="/api/projects/{id}",
+     *     tags={"projects"},
+     *     summary="Show a project",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Project details",
+     *         @OA\JsonContent(ref="#/components/schemas/Project")
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Project not found"
+     *     )
+     * )
      */
     public function show(Project $project): JsonResource
     {
@@ -64,7 +122,34 @@ class ProjectController extends Controller
     }
 
     /**
-     * Update the specified project in storage.
+     * @OA\Put(
+     *     path="/api/projects/{id}",
+     *     tags={"projects"},
+     *     summary="Update a project",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name"},
+     *             @OA\Property(property="name", type="string", example="Project Beta")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Project updated",
+     *         @OA\JsonContent(ref="#/components/schemas/Project")
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Project not found"
+     *     )
+     * )
      */
     public function update(UpdateProjectRequest $request, Project $project): JsonResponse
     {
@@ -82,7 +167,30 @@ class ProjectController extends Controller
     }
 
     /**
-     * Remove the specified project from storage.
+     * @OA\Delete(
+     *     path="/api/projects/{id}",
+     *     tags={"projects"},
+     *     summary="Delete a project",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Project deleted"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Project not found"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Project has folders and cannot be deleted"
+     *     )
+     * )
      */
     public function destroy(Project $project): JsonResponse
     {
