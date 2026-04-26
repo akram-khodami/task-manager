@@ -62,3 +62,7 @@ php artisan migrate --seed
 
 php artisan serve
 # App will run at http://localhost:8000
+
+# Generate API documentation
+php artisan vendor:publish --provider="L5Swagger\\L5SwaggerServiceProvider" --tag="config"
+php artisan l5-swagger:generate

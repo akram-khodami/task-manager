@@ -13,10 +13,43 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
 
+/**
+ * @OA\Tag(
+ *     name="folders",
+ *     description="Folder management endpoints"
+ * )
+ */
 class FolderController extends Controller
 {
     /**
-     * Display a listing of the folders.
+     * @OA\Get(
+     *     path="/api/folders",
+     *     tags={"folders"},
+     *     summary="List folders",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="project_id",
+     *         in="query",
+     *         required=false,
+     *         @OA\Schema(type="integer"),
+     *         description="Filter by project ID"
+     *     ),
+     *     @OA\Parameter(
+     *         name="parent_id",
+     *         in="query",
+     *         required=false,
+     *         @OA\Schema(type="integer"),
+     *         description="Filter by parent folder ID"
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="List of folders",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(ref="#/components/schemas/Folder")
+     *         )
+     *     )
+     * )
      */
     public function index(): JsonResource
     {
@@ -38,7 +71,30 @@ class FolderController extends Controller
     }
 
     /**
-     * Store a newly created folder in storage.
+     * @OA\Post(
+     *     path="/api/folders",
+     *     tags={"folders"},
+     *     summary="Create a folder",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name","project_id"},
+     *             @OA\Property(property="name", type="string", example="Sprint 1"),
+     *             @OA\Property(property="project_id", type="integer", example=1),
+     *             @OA\Property(property="parent_id", type="integer", example=2)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Folder created",
+     *         @OA\JsonContent(ref="#/components/schemas/Folder")
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error"
+     *     )
+     * )
      */
     public function store(StoreFolderRequest $request): JsonResponse
     {
@@ -55,7 +111,27 @@ class FolderController extends Controller
     }
 
     /**
-     * Display the specified folder.
+     * @OA\Get(
+     *     path="/api/folders/{id}",
+     *     tags={"folders"},
+     *     summary="Show a folder",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Folder details",
+     *         @OA\JsonContent(ref="#/components/schemas/Folder")
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Folder not found"
+     *     )
+     * )
      */
     public function show(Folder $folder): JsonResource
     {
@@ -67,7 +143,35 @@ class FolderController extends Controller
     }
 
     /**
-     * Update the specified folder in storage.
+     * @OA\Put(
+     *     path="/api/folders/{id}",
+     *     tags={"folders"},
+     *     summary="Update a folder",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name"},
+     *             @OA\Property(property="name", type="string", example="Sprint 2"),
+     *             @OA\Property(property="parent_id", type="integer", example=2)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Folder updated",
+     *         @OA\JsonContent(ref="#/components/schemas/Folder")
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Folder not found"
+     *     )
+     * )
      */
     public function update(UpdateFolderRequest $request, Folder $folder): JsonResponse
     {
@@ -86,7 +190,30 @@ class FolderController extends Controller
     }
 
     /**
-     * Remove the specified folder from storage.
+     * @OA\Delete(
+     *     path="/api/folders/{id}",
+     *     tags={"folders"},
+     *     summary="Delete a folder",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Folder deleted"
+     *     ),
+     *     @OA\Response(
+     *         response=409,
+     *         description="Folder has children or tasks, cannot be deleted"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Folder not found"
+     *     )
+     * )
      */
     public function destroy(Folder $folder): JsonResponse
     {

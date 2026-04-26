@@ -12,10 +12,32 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use App\Events\AssignedTask;
 
+/**
+ * @OA\Tag(
+ *     name="tasks",
+ *     description="Task management endpoints"
+ * )
+ */
 class TaskController extends Controller
 {
     /**
-     * Display a listing of the tasks.
+     * @OA\Get(
+     *     path="/api/tasks",
+     *     tags={"tasks"},
+     *     summary="List tasks",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(name="project_id", in="query", required=false, @OA\Schema(type="integer"), description="Filter by project ID"),
+     *     @OA\Parameter(name="status", in="query", required=false, @OA\Schema(type="string"), description="Filter by status"),
+     *     @OA\Parameter(name="priority", in="query", required=false, @OA\Schema(type="string"), description="Filter by priority"),
+     *     @OA\Parameter(name="assigned_to", in="query", required=false, @OA\Schema(type="integer"), description="Filter by assigned user ID"),
+     *     @OA\Parameter(name="created_by", in="query", required=false, @OA\Schema(type="integer"), description="Filter by creator user ID"),
+     *     @OA\Parameter(name="search", in="query", required=false, @OA\Schema(type="string"), description="Search in title or description"),
+     *     @OA\Response(
+     *         response=200,
+     *         description="List of tasks",
+     *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/Task"))
+     *     )
+     * )
      */
     public function index()
     {
@@ -54,7 +76,34 @@ class TaskController extends Controller
     }
 
     /**
-     * Store a newly created task in storage.
+     * @OA\Post(
+     *     path="/api/tasks",
+     *     tags={"tasks"},
+     *     summary="Create a task",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"title","folder_id","status","priority"},
+     *             @OA\Property(property="title", type="string", example="Implement login"),
+     *             @OA\Property(property="description", type="string", example="Implement the login functionality for the app"),
+     *             @OA\Property(property="folder_id", type="integer", example=1),
+     *             @OA\Property(property="status", type="string", example="pending"),
+     *             @OA\Property(property="priority", type="string", example="high"),
+     *             @OA\Property(property="due_date", type="string", format="date", example="2025-06-10"),
+     *             @OA\Property(property="assigned_to", type="integer", example=2)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Task created",
+     *         @OA\JsonContent(ref="#/components/schemas/Task")
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error"
+     *     )
+     * )
      */
     public function store(StoreTaskRequest $request)
     {
@@ -80,7 +129,22 @@ class TaskController extends Controller
     }
 
     /**
-     * Display the specified task.
+     * @OA\Get(
+     *     path="/api/tasks/{id}",
+     *     tags={"tasks"},
+     *     summary="Show a task",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Task details",
+     *         @OA\JsonContent(ref="#/components/schemas/Task")
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Task not found"
+     *     )
+     * )
      */
     public function show(Task $task)
     {
@@ -92,7 +156,34 @@ class TaskController extends Controller
     }
 
     /**
-     * Update the specified task in storage.
+     * @OA\Put(
+     *     path="/api/tasks/{id}",
+     *     tags={"tasks"},
+     *     summary="Update a task",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"title","status","priority"},
+     *             @OA\Property(property="title", type="string", example="Implement login"),
+     *             @OA\Property(property="description", type="string", example="Implement the login functionality for the app"),
+     *             @OA\Property(property="status", type="string", example="pending"),
+     *             @OA\Property(property="priority", type="string", example="high"),
+     *             @OA\Property(property="due_date", type="string", format="date", example="2025-06-10"),
+     *             @OA\Property(property="assigned_to", type="integer", example=2)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Task updated",
+     *         @OA\JsonContent(ref="#/components/schemas/Task")
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Task not found"
+     *     )
+     * )
      */
     public function update(UpdateTaskRequest $request, Task $task)
     {
@@ -111,7 +202,25 @@ class TaskController extends Controller
     }
 
     /**
-     * Remove the specified task from storage.
+     * @OA\Delete(
+     *     path="/api/tasks/{id}",
+     *     tags={"tasks"},
+     *     summary="Delete a task",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Task deleted"
+     *     ),
+     *     @OA\Response(
+     *         response=409,
+     *         description="Task has attachments, cannot be deleted"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Task not found"
+     *     )
+     * )
      */
     public function destroy(Task $task)
     {
